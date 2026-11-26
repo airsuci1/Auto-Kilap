@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Detail Pesanan #{{ booking.booking_code }} - AutoKilap{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto space-y-6 pb-12">
+  
+  <div class="flex items-center justify-between">
+    <a href="/my-bookings" class="text-xs text-sky-600 hover:text-sky-700 flex items-center gap-1 font-semibold">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      <span>Daftar Pesanan Saya</span>
+    </a>
+    <span class="text-xs font-mono font-bold text-slate-500">#{{ booking.booking_code }}</span>
+  </div>
+
+  <!-- Status Card Header -->
+  <div class="glass-card p-6 text-center space-y-3 relative overflow-hidden border-t-4 
+    {% if booking.status == 'confirmed' %}border-t-sky-500
+    {% elif booking.status == 'completed' %}border-t-emerald-500
+    {% elif booking.status == 'cancelled' %}border-t-red-500
+    {% else %}border-t-amber-500{% endif %}">
+
+    <!-- Status Icon -->
+    <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl
+      {% if booking.status == 'confirmed' %}bg-sky-100 text-sky-600
+      {% elif booking.status == 'completed' %}bg-emerald-100 text-emerald-600
+      {% elif booking.status == 'cancelled' %}bg-red-100 text-red-600
+      {% else %}bg-amber-100 text-amber-600{% endif %}">
+      {% if booking.status == 'confirmed' %}✓
+      {% elif booking.status == 'completed' %}🏆
+      {% elif booking.status == 'cancelled' %}✕
+      {% else %}⏳{% endif %}
+    </div>
+
+    <div>
+      <h1 class="text-xl font-black text-slate-900">
+        {% if booking.status == 'pending' %}Pesanan Menunggu Konfirmasi Admin
+        {% elif booking.status == 'confirmed' %}Jadwal Telah Dikonfirmasi!
+        {% elif booking.status == 'in_progress' %}Tim Sedang Dalam Pengerjaan
+        {% elif booking.status == 'completed' %}Pesanan Telah Selesai
+        {% elif booking.status == 'cancelled' %}Pesanan Dibatalkan
+        {% endif %}
+      </h1>
+      <p class="text-xs text-slate-500 mt-1">
+        {% if booking.status == 'pending' %}
+          Admin kami sedang memverifikasi pesanan Anda dan akan segera menghubungi via WhatsApp.
+        {% elif booking.status == 'confirmed' %}
+          Slot jadwal Anda telah dikunci dan tim kami akan datang tepat waktu ke lokasi Anda.
+        {% elif booking.status == 'completed' %}
+          Terima kasih telah menggunakan jasa cuci panggilan AutoKilap!
+        {% endif %}
+      </p>
+    </div>
+
+    <!-- Direct WhatsApp Admin Button -->
+    <div class="pt-2">
+      <a href="https://wa.me/{{ admin_wa }}?text={{ customer_wa_text }}" target="_blank"
+         class="btn-whatsapp w-full sm:w-auto text-xs py-3 px-5">
+        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.044c.101-.116.433-.506.549-.68.116-.173.232-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/>
+        </svg>
+        <span>Hubungi Admin via WhatsApp</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Detail Information -->
+  <div class="glass-card p-6 space-y-4">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2">
+      Rincian Pesanan
+    </h3>
+
+    <div class="space-y-3 text-sm">
+      <div class="flex justify-between">
+        <span class="text-slate-500">Kode Booking:</span>
+        <span class="font-bold font-mono text-slate-900">{{ booking.booking_code }}</span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-slate-500">Kendaraan:</span>
+        <span class="font-bold text-slate-900">{{ booking.vehicle_model }} ({{ booking.license_plate }})</span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-slate-500">Paket Layanan:</span>
+        <span class="font-bold text-slate-900">{{ booking.package_name }}</span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-slate-500">Jadwal Kedatangan:</span>
+        <span class="font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">
+          📅 {{ booking.booking_date }} pk {{ booking.booking_time }} WIB
+        </span>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
+        <span class="text-slate-500">Lokasi / Alamat:</span>
+        <div class="text-left sm:text-right max-w-xs space-y-1">
+          <span class="font-semibold text-slate-900 block">{{ booking.customer_address }}</span>
+          <a href="{{ maps_url }}" target="_blank"
+             class="inline-flex items-center gap-1.5 text-xs text-sky-600 hover:text-sky-700 font-bold bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span>Buka Navigasi Google Maps</span>
+          </a>
+        </div>
+      </div>
+
+      {% if booking.customer_notes %}
+      <div class="flex justify-between">
+        <span class="text-slate-500">Catatan:</span>
+        <span class="text-slate-700 text-right">{{ booking.customer_notes }}</span>
+      </div>
+      {% endif %}
+
+      <div class="flex justify-between">
+        <span class="text-slate-500">Metode Pembayaran:</span>
+        <span class="font-bold text-emerald-700">💵 Tunai di Tempat (COD)</span>
+      </div>
+
+      <div class="flex justify-between items-center pt-3 border-t border-slate-200">
+        <span class="text-base font-bold text-slate-900">Total Tagihan:</span>
+        <span class="text-xl font-black text-sky-600">Rp {{ "{:,}".format(booking.total_price).replace(',', '.') }}</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

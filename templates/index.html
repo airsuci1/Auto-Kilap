@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}AutoKilap - Jasa Cuci Mobil & Motor Panggilan Online{% endblock %}
+
+{% block content %}
+<div class="space-y-10">
+  
+  <!-- INFORMASI ORDERAN YANG SEDANG AKTIF (Khusus Pelanggan yang Memiliki Pesanan Aktif) -->
+  {% if current_user and current_user.role != 'admin' and active_orders %}
+    <section class="bg-white rounded-3xl p-5 sm:p-7 border-2 border-sky-300 shadow-lg shadow-sky-500/10 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="relative flex h-3.5 w-3.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span>
+          </span>
+          <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Pesanan Aktif Anda ({{ active_orders|length }})</h2>
+        </div>
+        <a href="/riwayat-transaksi" class="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1">
+          <span>Lihat Semua Riwayat Pesanan</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 {% if active_orders|length > 1 %}md:grid-cols-2{% endif %} gap-4">
+        {% for order in active_orders %}
+          <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-sky-50/80 via-white to-sky-50/40 border {{ order.status_border }} shadow-sm space-y-3.5 hover:shadow-md transition">
+            
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-mono text-xs font-bold text-slate-500">#{{ order.booking_code }}</span>
+              <span class="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full border
+                {% if order.status == 'in_progress' %}bg-emerald-50 text-emerald-800 border-emerald-300
+                {% elif order.status == 'confirmed' %}bg-sky-50 text-sky-800 border-sky-300
+                {% else %}bg-amber-50 text-amber-800 border-amber-300{% endif %}">
+                <span>{{ order.status_icon }}</span>
+                <span>{{ order.status_label }}</span>
+              </span>
+            </div>
+
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-black text-slate-900 text-base flex items-center gap-1.5">
+                  <span>{% if order.vehicle_type == 'mobil' %}🚗{% else %}🛵{% endif %}</span>
+                  <span>{{ order.vehicle_model }}</span>
+                </h3>
+                <p class="text-xs font-bold text-sky-700 mt-0.5">{{ order.package_name }}</p>
+                <span class="inline-block text-[11px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded mt-1">{{ order.license_plate }}</span>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-[11px] text-slate-500 block">Total Tagihan (COD):</span>
+                <span class="text-base font-black text-slate-900">Rp {{ "{:,}".format(order.total_price).replace(',', '.') }}</span>
+              </div>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl border border-slate-200/80 text-xs text-slate-600 space-y-1.5">
+              <div class="flex items-center gap-2 font-semibold text-slate-800">
+                <svg class="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span>Jadwal Kedatangan: <strong>{{ order.booking_date }} pk {{ order.booking_time }} WIB</strong></span>
+              </div>
+              <div class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-slate-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span class="line-clamp-1">{{ order.customer_address }}</span>
+              </div>
+              <p class="text-[11px] text-slate-500 pt-1 border-t border-slate-100 italic">{{ order.status_desc }}</p>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+              <a href="/booking/{{ order.id }}" class="w-full sm:w-auto text-center bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition">
+                Lihat Detail & Hubungi Admin WhatsApp →
+              </a>
+            </div>
+
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- Hero Section -->
+
+  <section class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-sky-950 text-white p-6 sm:p-12 shadow-xl border border-slate-700/50">
+    <div class="absolute -right-12 -top-12 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -left-12 -bottom-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-2xl space-y-5">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-300 text-xs font-semibold backdrop-blur">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Layanan Cuci Panggilan Aktif Hari Ini</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+        Mobil & Motor Kinclong <br class="hidden sm:inline">
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">
+          Tanpa Perlu Keluar Rumah!
+        </span>
+      </h1>
+
+      <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+        Gak perlu lagi buang waktu dan macet di tempat carwash. Kami membawa peralatan lengkap langsung ke garasi rumah, kantor, atau apartemen Anda.
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-wrap items-center gap-3 pt-2">
+        <a href="/booking/new" class="bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white font-bold px-6 py-3.5 rounded-2xl shadow-lg shadow-sky-500/25 flex items-center gap-2 transform active:scale-95 transition">
+          <span>Booking Jadwal Sekarang</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </a>
+
+        <!-- Install PWA trigger -->
+        <button onclick="triggerPWAInstall()" class="btn-install-pwa bg-slate-800/80 hover:bg-slate-700/80 text-white font-semibold px-4 py-3.5 rounded-2xl border border-slate-600 text-sm flex items-center gap-2 transition">
+          <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+          </svg>
+          <span>Pasang di HP (PWA)</span>
+        </button>
+      </div>
+
+      <!-- Quick Trust Indicators -->
+      <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-700/60 text-xs text-slate-300">
+        <div class="flex items-center gap-1.5">
+          <span class="text-emerald-400 font-bold">✓</span> Bayar Tunai (COD)
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-emerald-400 font-bold">✓</span> Slot Terjadwal Pas
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-emerald-400 font-bold">✓</span> Sabun & Wax Premium
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PWA Advantage Notice for Mobile Users -->
+  <section class="bg-gradient-to-r from-sky-50 via-cyan-50 to-indigo-50 border border-sky-200/80 rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3.5">
+      <div class="w-12 h-12 rounded-2xl bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-sky-600/20">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-sm sm:text-base">Gunakan Sebagai Aplikasi di HP Anda</h3>
+        <p class="text-xs text-slate-600 mt-0.5">Tidak perlu install dari Play Store. Cukup klik tombol tambah icon untuk pasang di layar utama!</p>
+      </div>
+    </div>
+    <button onclick="triggerPWAInstall()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm whitespace-nowrap transition">
+      + Tambah Icon
+    </button>
+  </section>
+
+  <!-- How It Works (Alur 4 Langkah) -->
+  <section class="space-y-6">
+    <div class="text-center max-w-lg mx-auto space-y-1.5">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Cara Pemesanan Praktis</h2>
+      <p class="text-slate-500 text-sm">Hanya butuh 1 menit untuk menjadwalkan cuci mobil atau motor Anda.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <!-- Step 1 -->
+      <div class="glass-card p-5 space-y-3 relative overflow-hidden">
+        <span class="absolute right-3 top-2 text-4xl font-black text-slate-100 select-none">01</span>
+        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 font-bold flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-slate-800 text-base">Pilih Paket</h3>
+        <p class="text-xs text-slate-500 leading-relaxed">Tersedia untuk Mobil & Motor: Cuci Reguler, Salju, Vacuum Interior, hingga Detailing & Wax.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="glass-card p-5 space-y-3 relative overflow-hidden">
+        <span class="absolute right-3 top-2 text-4xl font-black text-slate-100 select-none">02</span>
+        <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-700 font-bold flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-slate-800 text-base">Tentukan Jadwal Kosong</h3>
+        <p class="text-xs text-slate-500 leading-relaxed">Pilih tanggal dan jam operasional yang masih kosong. Jadwal terkonfirmasi tidak dapat bentrok.</p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="glass-card p-5 space-y-3 relative overflow-hidden">
+        <span class="absolute right-3 top-2 text-4xl font-black text-slate-100 select-none">03</span>
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-slate-800 text-base">Konfirmasi via WhatsApp</h3>
+        <p class="text-xs text-slate-500 leading-relaxed">Admin akan langsung menghubungi nomor WhatsApp Anda untuk memverifikasi alamat & kedatangan tim.</p>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="glass-card p-5 space-y-3 relative overflow-hidden">
+        <span class="absolute right-3 top-2 text-4xl font-black text-slate-100 select-none">04</span>
+        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 font-bold flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-slate-800 text-base">Bayar Tunai di Tempat</h3>
+        <p class="text-xs text-slate-500 leading-relaxed">Tim datang tepat waktu, mencuci hingga bersih kinclong, dan Anda cukup bayar tunai (cash) di tempat.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Package Showcase Section -->
+  <section class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Daftar Paket & Biaya Layanan</h2>
+        <p class="text-slate-500 text-sm mt-0.5">Pilihan paket lengkap hemat berkualitas untuk kendaraan Anda.</p>
+      </div>
+      <a href="/booking/new" class="text-sm font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1">
+        <span>Buka Form Booking Lengkap</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <!-- Mobil Packages Grid -->
+    <div class="space-y-3">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🚗</span>
+        <h3 class="font-bold text-slate-800 text-base">Paket Cuci Mobil</h3>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for pkg in car_packages %}
+          <div class="glass-card p-5 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h4 class="font-bold text-slate-900 text-base">{{ pkg.name }}</h4>
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 mt-0.5">
+                    ⏱️ Estimasi {{ pkg.duration_minutes }} Menit
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span class="text-lg font-black text-sky-600">Rp {{ "{:,}".format(pkg.price).replace(',', '.') }}</span>
+                </div>
+              </div>
+              <p class="text-xs text-slate-600 mt-3 leading-relaxed">{{ pkg.description }}</p>
+            </div>
+            <a href="/booking/new?package_id={{ pkg.id }}&category=mobil" class="w-full text-center bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs py-2.5 rounded-xl border border-sky-200 transition">
+              Pilih Paket Ini
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Motor Packages Grid -->
+    <div class="space-y-3 pt-4">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🛵</span>
+        <h3 class="font-bold text-slate-800 text-base">Paket Cuci Motor</h3>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {% for pkg in motor_packages %}
+          <div class="glass-card p-5 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h4 class="font-bold text-slate-900 text-sm">{{ pkg.name }}</h4>
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 mt-0.5">
+                    ⏱️ {{ pkg.duration_minutes }} Menit
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span class="text-base font-black text-sky-600">Rp {{ "{:,}".format(pkg.price).replace(',', '.') }}</span>
+                </div>
+              </div>
+              <p class="text-xs text-slate-600 mt-3 leading-relaxed">{{ pkg.description }}</p>
+            </div>
+            <a href="/booking/new?package_id={{ pkg.id }}&category=motor" class="w-full text-center bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs py-2.5 rounded-xl border border-sky-200 transition">
+              Pilih Paket Ini
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner Bottom -->
+  <section class="rounded-3xl bg-sky-600 text-white p-8 sm:p-10 text-center space-y-4 shadow-xl shadow-sky-600/20">
+    <h2 class="text-2xl sm:text-3xl font-black">Siap Buat Mobil & Motor Anda Kinclong Hari Ini?</h2>
+    <p class="text-sky-100 text-sm max-w-xl mx-auto">
+      Daftar dan jadwalkan cuci sekarang. Pilih jam yang masih kosong sebelum diambil orang lain!
+    </p>
+    <div class="pt-2">
+      <a href="/booking/new" class="inline-flex items-center gap-2 bg-white text-sky-700 hover:bg-sky-50 font-bold text-sm px-6 py-3.5 rounded-2xl shadow-lg transition">
+        <span>Mulai Booking Cuci Sekarang</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="pt-6 border-t border-slate-200 text-center text-xs text-slate-500 space-y-2">
+    <p>&copy; 2026 AutoKilap - Layanan Jasa Cuci Mobil & Motor Panggilan Berbasis PWA.</p>
+    <p>
+      <span>Mudah dioperasikan, responsif smartphone, tanpa ribet instalasi.</span>
+      <span class="mx-1">•</span>
+      <a href="/privacy-policy" class="text-sky-600 hover:underline font-semibold">Kebijakan Privasi</a>
+    </p>
+  </footer>
+
+</div>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Manajemen User & Data Pelanggan - Admin AutoKilap{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6 pb-16">
+  
+  <!-- Header Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="space-y-1">
+      <div class="flex items-center gap-2">
+        <a href="/admin/dashboard" class="text-xs text-sky-600 hover:text-sky-700 flex items-center gap-1 font-semibold">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          <span>Dashboard Admin</span>
+        </a>
+        <span class="text-slate-300">•</span>
+        <span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-bold uppercase tracking-wider">
+          Data Pelanggan
+        </span>
+      </div>
+      <h1 class="text-2xl font-black text-slate-900 tracking-tight">Manajemen User & Pelanggan</h1>
+      <p class="text-xs text-slate-500">Kelola akun pengguna, pantau aktivitas order cuci, verifikasi email, dan kontak via WhatsApp</p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <a href="/admin/dashboard" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 transition flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+        <span>Pesanan Masuk</span>
+      </a>
+      <a href="/admin/finance" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>Laporan Keuangan</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Statistics Cards -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+    <div class="glass-card p-4 space-y-1">
+      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Pengguna</span>
+      <span class="text-2xl font-black text-slate-900 block">{{ stats.total_users }}</span>
+      <span class="text-[11px] text-slate-500">Terdaftar di sistem</span>
+    </div>
+
+    <div class="glass-card p-4 space-y-1 border-sky-200 bg-sky-50/20">
+      <span class="text-[10px] font-bold text-sky-600 uppercase tracking-wider block">Pelanggan Aktif</span>
+      <span class="text-2xl font-black text-sky-700 block">{{ stats.total_customers }}</span>
+      <span class="text-[11px] text-sky-600">Akun Customer</span>
+    </div>
+
+    <div class="glass-card p-4 space-y-1 border-emerald-200 bg-emerald-50/20">
+      <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">Terverifikasi</span>
+      <span class="text-2xl font-black text-emerald-700 block">{{ stats.total_verified }}</span>
+      <span class="text-[11px] text-emerald-600">Email Valid</span>
+    </div>
+
+    <div class="glass-card p-4 space-y-1 border-amber-200 bg-amber-50/20">
+      <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider block">Admin Sistem</span>
+      <span class="text-2xl font-black text-amber-700 block">{{ stats.total_admins }}</span>
+      <span class="text-[11px] text-amber-600">Pengelola</span>
+    </div>
+  </div>
+
+  <!-- Filter & Search Section -->
+  <div class="glass-card p-4">
+    <form action="/admin/users" method="GET" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+      <!-- Search Input -->
+      <div class="sm:col-span-2">
+        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1" for="search">
+          Cari Pengguna
+        </label>
+        <div class="relative">
+          <input type="text" id="search" name="search" value="{{ search or '' }}" placeholder="Ketik nama, email, atau no HP..."
+                 class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-sky-500">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- Role Filter -->
+      <div>
+        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1" for="role">
+          Filter Role
+        </label>
+        <select id="role" name="role" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-sky-500">
+          <option value="all" {% if current_role == 'all' or not current_role %}selected{% endif %}>Semua Role</option>
+          <option value="user" {% if current_role == 'user' %}selected{% endif %}>👤 Pelanggan (User)</option>
+          <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>👑 Administrator</option>
+        </select>
+      </div>
+
+      <!-- Verified Filter & Button -->
+      <div class="flex items-end gap-2">
+        <div class="flex-1">
+          <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1" for="verified">
+            Status Email
+          </label>
+          <select id="verified" name="verified" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-sky-500">
+            <option value="all" {% if current_verified == 'all' or not current_verified %}selected{% endif %}>Semua Status</option>
+            <option value="1" {% if current_verified == '1' %}selected{% endif %}>✓ Terverifikasi</option>
+            <option value="0" {% if current_verified == '0' %}selected{% endif %}>✕ Belum Verifikasi</option>
+          </select>
+        </div>
+        <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition">
+          Filter
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Users List Table / Card View -->
+  <div class="glass-card overflow-hidden">
+    <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+      <h3 class="font-bold text-slate-900 text-sm">Daftar Data Pelanggan & User ({{ users|length }})</h3>
+      {% if search or current_role != 'all' or current_verified != 'all' %}
+        <a href="/admin/users" class="text-xs text-sky-600 font-bold hover:underline">Reset Filter</a>
+      {% endif %}
+    </div>
+
+    {% if not users %}
+      <div class="p-10 text-center space-y-2">
+        <span class="text-3xl">🔍</span>
+        <h4 class="font-bold text-slate-800 text-sm">Pengguna Tidak Ditemukan</h4>
+        <p class="text-xs text-slate-500">Tidak ada data pengguna yang cocok dengan kriteria pencarian.</p>
+      </div>
+    {% else %}
+      <div class="divide-y divide-slate-100">
+        {% for u in users %}
+          <div class="p-4 sm:p-5 hover:bg-slate-50/60 transition flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <!-- User Basic Info -->
+            <div class="flex items-start gap-3.5">
+              <div class="shrink-0">
+                {% if u.profile_photo %}
+                  <img src="{{ u.profile_photo }}" alt="{{ u.name }}" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-sm">
+                {% else %}
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 text-white font-black text-lg flex items-center justify-center shadow-sm">
+                    {{ u.name[0]|upper }}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-slate-900 text-sm">{{ u.name }}</h4>
+                  <span class="text-[10px] font-mono text-slate-400">#UID-{{ u.id }}</span>
+                  <span class="px-2 py-0.2 rounded-full text-[10px] font-bold uppercase
+                    {% if u.role == 'admin' %}bg-amber-100 text-amber-800 border border-amber-300{% else %}bg-sky-50 text-sky-700 border border-sky-200{% endif %}">
+                    {{ u.role }}
+                  </span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                  <span>{{ u.email }}</span>
+                  <span>•</span>
+                  <span>WhatsApp: <strong>{{ u.phone }}</strong></span>
+                </div>
+
+                <div class="flex items-center gap-2 pt-0.5">
+                  {% if u.is_verified %}
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      ✓ Email Terverifikasi
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      ⏳ Belum Verifikasi
+                    </span>
+                  {% endif %}
+                  <span class="text-[11px] text-slate-400">Bergabung: {{ (u.created_at|string)[:10] if u.created_at else '-' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Booking Stats & Financials -->
+            <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs md:text-right shrink-0">
+              <div>
+                <span class="text-[10px] text-slate-400 block uppercase font-bold">Total Order:</span>
+                <span class="font-black text-slate-800 text-sm">{{ u.total_bookings }} Booking</span>
+                {% if u.last_booking_date %}
+                  <span class="text-[10px] text-slate-500 block">Terakhir: {{ u.last_booking_date }}</span>
+                {% endif %}
+              </div>
+              <div class="border-l border-slate-200 pl-4">
+                <span class="text-[10px] text-slate-400 block uppercase font-bold">Total Belanja:</span>
+                <span class="font-black text-emerald-700 text-sm">Rp {{ "{:,}".format(u.total_spent).replace(',', '.') }}</span>
+                <span class="text-[10px] text-slate-500 block">Omzet Lunas</span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2 shrink-0 self-end md:self-auto">
+              <!-- WhatsApp Contact Button -->
+              <a href="https://wa.me/{{ u.wa_phone }}" target="_blank"
+                 class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition"
+                 title="Buka Chat WhatsApp Pelanggan">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                <span>Chat WA</span>
+              </a>
+
+              <!-- Toggle Verification Status Form -->
+              <form action="/admin/user/{{ u.id }}/toggle-verify" method="POST" onsubmit="return confirm('Ubah status verifikasi akun {{ u.name }}?')">
+                <button type="submit" 
+                        class="p-2 rounded-xl border text-xs font-bold transition
+                        {% if u.is_verified %}border-emerald-300 text-emerald-700 hover:bg-emerald-50{% else %}border-amber-300 text-amber-700 hover:bg-amber-50{% endif %}"
+                        title="{% if u.is_verified %}Ubah ke Belum Verifikasi{% else %}Setujui Verifikasi Manual{% endif %}">
+                  {% if u.is_verified %}✓ Aktif{% else %}⚡ Verifikasi{% endif %}
+                </button>
+              </form>
+
+              <!-- Role Switcher Form -->
+              {% if u.id != session.get('user_id') %}
+                <form action="/admin/user/{{ u.id }}/role" method="POST" onsubmit="return confirm('Ubah role {{ u.name }} menjadi {{ 'user' if u.role == 'admin' else 'admin' }}?')">
+                  <input type="hidden" name="role" value="{{ 'user' if u.role == 'admin' else 'admin' }}">
+                  <button type="submit" class="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold transition"
+                          title="Ubah role pengguna">
+                    {{ 'Jadikan User' if u.role == 'admin' else 'Jadikan Admin' }}
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

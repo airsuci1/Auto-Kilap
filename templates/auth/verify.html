@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Verifikasi Email - AutoKilap{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto space-y-6 pt-4 pb-8">
+  
+  <div class="text-center space-y-1">
+    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 shadow-inner">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+    </div>
+    <h1 class="text-2xl font-black text-slate-900 tracking-tight">Verifikasi Alamat Email</h1>
+    <p class="text-xs text-slate-500 max-w-xs mx-auto">
+      Silakan periksa kotak masuk atau spam email Anda pada:
+      <strong class="text-slate-800 block mt-1 text-sm">{{ email_target }}</strong>
+    </p>
+  </div>
+
+  {% if demo_mode and sim_email %}
+    <!-- Dev Helper Box: Shows verification code immediately for quick testing (Hanya Muncul Jika Demo Mode ON) -->
+    <div class="bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-300 rounded-2xl p-4 shadow-sm space-y-2">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] uppercase font-bold text-sky-800 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Simulasi Kotak Masuk Email (Demo Mode Aktif)
+        </span>
+        <span class="text-[10px] bg-sky-200 text-sky-800 px-2 py-0.5 rounded-full font-semibold">Demo On</span>
+      </div>
+      <p class="text-xs text-slate-600">
+        Kode verifikasi email Anda adalah: <strong class="text-sky-700 text-lg font-mono ml-1">{{ sim_email.code }}</strong>
+      </p>
+      <div class="flex items-center gap-2 pt-1">
+        <a href="{{ sim_email.verify_url }}" class="inline-flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition">
+          <span>✓ Verifikasi Otomatis Sekali Klik</span>
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="glass-card p-6 space-y-5">
+    <form action="/auth/verify" method="POST" class="space-y-4">
+      <input type="hidden" name="email" value="{{ email_target }}">
+
+      <div>
+        <label class="block text-center text-xs font-bold text-slate-700 uppercase tracking-wider mb-2" for="code">
+          Masukkan 6 Digit Kode Verifikasi
+        </label>
+        <input type="text" id="code" name="code" required maxlength="6" pattern="[0-9]{6}"
+               placeholder="123456" autofocus
+               class="w-full text-center tracking-[0.5em] font-mono text-2xl font-black px-4 py-3.5 rounded-xl border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition">
+      </div>
+
+      <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl shadow-md shadow-sky-600/20 text-sm transition transform active:scale-95">
+        Aktivasi Akun & Lanjut Login
+      </button>
+    </form>
+
+    <div class="border-t border-slate-100 pt-4 flex flex-col gap-2 text-center text-xs text-slate-500">
+      <form action="/auth/resend-code" method="POST">
+        <input type="hidden" name="email" value="{{ email_target }}">
+        <p>
+          Tidak menerima kode verifikasi?
+          <button type="submit" class="font-bold text-sky-600 hover:text-sky-700 ml-1 underline bg-transparent border-0 cursor-pointer">
+            Kirim Ulang Kode
+          </button>
+        </p>
+      </form>
+      <a href="/auth/login" class="text-slate-400 hover:text-slate-600 mt-2">Kembali ke Halaman Masuk</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Cuci Kendaraan Panggilan - AutoKilap{% endblock %}
+
+{% block extra_head %}
+<!-- Leaflet CSS for 100% Free OpenStreetMap Coordinate Picker -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  #mapPicker {
+    height: 220px;
+    width: 100%;
+    border-radius: 12px;
+    z-index: 10;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6 pb-12">
+  
+  <div class="space-y-1">
+    <a href="/" class="text-xs text-sky-600 hover:text-sky-700 flex items-center gap-1 font-semibold mb-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      <span>Kembali ke Beranda</span>
+    </a>
+    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Formulir Booking Cuci</h1>
+    <p class="text-xs sm:text-sm text-slate-500">Tentukan jenis kendaraan, paket layanan, alamat, dan pilih jam yang masih tersedia.</p>
+  </div>
+
+  <form id="bookingForm" action="/booking/create" method="POST" class="space-y-6">
+    <input type="hidden" name="vehicle_type" id="vehicle_type_input" value="{{ selected_category or 'mobil' }}">
+    <input type="hidden" name="package_id" id="package_id" value="{{ preselected_package_id or '' }}">
+    <input type="hidden" name="booking_time" id="booking_time" value="">
+
+    <!-- Step 1: Pilih Tipe Kendaraan -->
+    <div class="glass-card p-5 space-y-3">
+      <div class="flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+        <h2 class="font-bold text-slate-900 text-base">Pilih Jenis Kendaraan</h2>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        <button type="button" data-category="mobil"
+                class="vehicle-btn {% if not selected_category or selected_category == 'mobil' %}active border-sky-600 bg-sky-50{% endif %}">
+          <span class="text-3xl">🚗</span>
+          <div class="text-left">
+            <span class="font-black text-slate-900 block text-sm sm:text-base">Mobil</span>
+            <span class="text-[11px] text-slate-500">Sedan, MPV, SUV, Hatchback</span>
+          </div>
+        </button>
+
+        <button type="button" data-category="motor"
+                class="vehicle-btn {% if selected_category == 'motor' %}active border-sky-600 bg-sky-50{% endif %}">
+          <span class="text-3xl">🛵</span>
+          <div class="text-left">
+            <span class="font-black text-slate-900 block text-sm sm:text-base">Motor</span>
+            <span class="text-[11px] text-slate-500">Bebek, Matic, Moge 250cc+</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Pilih Paket Cuci (DILENGKAPI RADIO BUTTON & BORDER BIRU) -->
+    <div class="glass-card p-5 space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">2</span>
+          <h2 class="font-bold text-slate-900 text-base">Pilih Paket Layanan</h2>
+        </div>
+        <span class="text-xs text-sky-600 font-semibold">Tandai 1 Paket</span>
+      </div>
+
+      <div id="packageContainer" class="grid grid-cols-1 gap-3 pt-1">
+        {% for pkg in packages %}
+          <div data-id="{{ pkg.id }}" data-category="{{ pkg.category }}" data-name="{{ pkg.name }}" data-price="{{ pkg.price }}"
+               class="package-card p-4 rounded-2xl border-2 border-slate-200 cursor-pointer hover:border-sky-300 transition-all bg-white space-y-2 select-none
+                      {% if preselected_package_id and pkg.id == preselected_package_id %}selected border-sky-600 bg-sky-50/70 ring-2 ring-sky-500/20{% endif %}">
+            
+            <div class="flex items-start gap-3">
+              <!-- Radio Button di Pojok Kiri Atas Setiap Paket -->
+              <div class="pt-0.5 shrink-0">
+                <input type="radio" name="package_selection_radio" id="pkg_radio_{{ pkg.id }}" value="{{ pkg.id }}"
+                       class="package-radio-input w-5 h-5 text-sky-600 focus:ring-sky-500 border-slate-300 cursor-pointer"
+                       {% if preselected_package_id and pkg.id == preselected_package_id %}checked{% endif %}>
+              </div>
+
+              <!-- Isi Paket Layanan -->
+              <div class="flex-1">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <label for="pkg_radio_{{ pkg.id }}" class="font-black text-slate-900 text-sm sm:text-base leading-snug cursor-pointer block">
+                      {{ pkg.name }}
+                    </label>
+                    <span class="inline-block text-[11px] font-semibold text-slate-500 mt-0.5">⏱️ Durasi ± {{ pkg.duration_minutes }} Menit</span>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <span class="text-base sm:text-lg font-black text-sky-600">Rp {{ "{:,}".format(pkg.price).replace(',', '.') }}</span>
+                  </div>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed mt-1.5">{{ pkg.description }}</p>
+              </div>
+            </div>
+
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Step 3: Tentukan Tanggal & Jam Kosong -->
+    <div class="glass-card p-5 space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">3</span>
+        <h2 class="font-bold text-slate-900 text-base">Pilih Hari & Jam Kosong</h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="booking_date">
+            Pilih Tanggal Booking
+          </label>
+          <input type="date" id="booking_date" name="booking_date" required
+                 class="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500 transition">
+        </div>
+        <div class="flex flex-col justify-end text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <span class="font-bold text-slate-700 mb-0.5">ℹ️ Ketentuan Slot:</span>
+          <span>Hanya jam kosong yang dapat dipilih. Jadwal yang telah dikonfirmasi admin otomatis terkunci.</span>
+        </div>
+      </div>
+
+      <div class="space-y-2 pt-2">
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+          Pilih Jam Kedatangan Tim:
+        </label>
+        
+        <div id="slotLoading" class="hidden text-center py-4 text-xs text-slate-500">
+          <span class="inline-block animate-spin mr-1">⏳</span> Memeriksa ketersediaan jam...
+        </div>
+
+        <div id="slotContainer" class="slot-grid">
+          <!-- Dynamically populated by /api/slots via booking.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Detail Kendaraan & Lokasi Alamat Panggilan -->
+    <div class="glass-card p-5 space-y-6">
+      <div class="flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">4</span>
+        <h2 class="font-bold text-slate-900 text-base">Detail Kendaraan & Lokasi Panggilan</h2>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- BAGIAN KENDARAAN (Dropdown + Inline Add)       -->
+      <!-- ============================================== -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider" for="user_vehicle_select">
+            Pilih Kendaraan Anda
+          </label>
+          <button type="button" id="btnToggleNewVehicle"
+                  class="text-xs font-bold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>+ Tambah Kendaraan Baru</span>
+          </button>
+        </div>
+
+        <!-- Dropdown Kendaraan yang pernah diinput user -->
+        <select id="user_vehicle_select"
+                class="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500 transition bg-white shadow-sm">
+          <option value="">-- Pilih dari Kendaraan Tersimpan --</option>
+          {% for v in user_vehicles %}
+            <option value="{{ v.id }}" data-type="{{ v.vehicle_type }}" data-model="{{ v.vehicle_model }}" data-plate="{{ v.license_plate }}">
+              {{ '🚗 Mobil' if v.vehicle_type == 'mobil' else '🛵 Motor' }}: {{ v.vehicle_model }} ({{ v.license_plate }})
+            </option>
+          {% endfor %}
+          <option value="new">+ Input Data Kendaraan Baru...</option>
+        </select>
+      </div>
+
+      <!-- INLINE BOX: INPUT KENDARAAN BARU (Tanpa Berpindah Halaman) -->
+      <div id="newVehicleInlineBox" class="p-4 bg-sky-50/70 border border-sky-200 rounded-2xl space-y-3 transition-all {% if user_vehicles %}hidden{% endif %}">
+        <div class="flex items-center justify-between border-b border-sky-100 pb-2">
+          <span class="text-xs font-black text-sky-900 flex items-center gap-1.5">
+            <span>➕ Form Tambah Kendaraan Baru</span>
+          </span>
+          {% if user_vehicles %}
+          <button type="button" id="btnCancelNewVehicle" class="text-slate-400 hover:text-slate-600 text-xs font-bold">
+            ✕ Tutup Form
+          </button>
+          {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Tipe Kendaraan</label>
+            <select id="inline_vehicle_type" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold bg-white focus:ring-1 focus:ring-sky-500">
+              <option value="mobil">🚗 Mobil</option>
+              <option value="motor">🛵 Motor</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Model / Seri</label>
+            <input type="text" id="inline_vehicle_model" placeholder="Contoh: Toyota Avanza / Honda PCX"
+                   class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-1 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Nomor Plat Polisi</label>
+            <input type="text" id="inline_license_plate" placeholder="Contoh: B 1234 ABC"
+                   class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs uppercase focus:ring-1 focus:ring-sky-500">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-[11px] text-slate-500">Data otomatis tersimpan ke akun Anda untuk pemesanan berikutnya.</span>
+          <button type="button" id="btnSaveInlineVehicle"
+                  class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5">
+            <span>Simpan & Gunakan Kendaraan</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden actual inputs for vehicle -->
+      <input type="hidden" id="vehicle_model" name="vehicle_model" required value="">
+      <input type="hidden" id="license_plate" name="license_plate" required value="">
+
+      <!-- Active Selected Vehicle Indicator Badge -->
+      <div id="activeVehicleDisplay" class="hidden p-3 bg-emerald-50 border border-emerald-200 rounded-xl items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span id="activeVehicleIcon" class="text-xl">🚗</span>
+          <div>
+            <span class="text-[11px] text-emerald-800 uppercase font-bold block">Kendaraan Terpilih:</span>
+            <span id="activeVehicleText" class="text-xs font-black text-slate-900">-</span>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold text-emerald-700 bg-white px-2 py-0.5 rounded-full border border-emerald-300">Siap</span>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- BAGIAN ALAMAT & MAP KOORDINAT (100% GRATIS)     -->
+      <!-- ============================================== -->
+      <div class="space-y-3 pt-4 border-t border-slate-200">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider" for="user_address_select">
+            Pilih Alamat Lokasi Cuci
+          </label>
+          <button type="button" id="btnToggleNewAddress"
+                  class="text-xs font-bold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>+ Tambah Alamat Baru</span>
+          </button>
+        </div>
+
+        <!-- Dropdown Alamat Tersimpan -->
+        <select id="user_address_select"
+                class="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500 transition bg-white shadow-sm">
+          <option value="">-- Pilih dari Alamat Tersimpan --</option>
+          {% for a in user_addresses %}
+            <option value="{{ a.id }}" data-address="{{ a.address }}" data-notes="{{ a.notes or '' }}" data-lat="{{ a.latitude or '' }}" data-lng="{{ a.longitude or '' }}">
+              📍 {{ a.label }}: {{ a.address[:45] }}{% if a.address|length > 45 %}...{% endif %}
+            </option>
+          {% endfor %}
+          <option value="new">+ Input Data Alamat Baru...</option>
+        </select>
+      </div>
+
+      <!-- INLINE BOX: TAMBAH ALAMAT BARU & MAP COORDINATE PICKER (Tanpa Pindah Halaman) -->
+      <div id="newAddressInlineBox" class="p-4 bg-sky-50/70 border border-sky-200 rounded-2xl space-y-4 transition-all {% if user_addresses %}hidden{% endif %}">
+        <div class="flex items-center justify-between border-b border-sky-100 pb-2">
+          <span class="text-xs font-black text-sky-900 flex items-center gap-1.5">
+            <span>📍 Form Input Alamat & Titik Koordinat Peta</span>
+          </span>
+          {% if user_addresses %}
+          <button type="button" id="btnCancelNewAddress" class="text-slate-400 hover:text-slate-600 text-xs font-bold">
+            ✕ Tutup Form
+          </button>
+          {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Label Alamat</label>
+            <input type="text" id="inline_address_label" placeholder="Contoh: Rumah / Kantor" value="Rumah"
+                   class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-1 focus:ring-sky-500 bg-white font-semibold">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Alamat Lengkap</label>
+            <textarea id="inline_address_text" rows="2" placeholder="Nama jalan, nomor rumah, RT/RW, komplek..."
+                      class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-1 focus:ring-sky-500 bg-white"></textarea>
+          </div>
+        </div>
+
+        <!-- 100% Free Map Picker (OpenStreetMap via Leaflet) -->
+        <div class="space-y-2 bg-white p-3.5 rounded-xl border border-sky-200 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-bold text-slate-800 flex items-center gap-1">
+                <span>🗺️ Tentukan Titik Koordinat Peta (Layanan Gratis)</span>
+              </span>
+              <p class="text-[11px] text-slate-500">Klik pada peta atau geser pin merah untuk menandai lokasi tim cuci.</p>
+            </div>
+            <button type="button" id="btnGetCurrentLocation"
+                    class="bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-sky-200 transition flex items-center gap-1 self-start sm:self-auto">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+              <span>📍 Gunakan Lokasi GPS Saya</span>
+            </button>
+          </div>
+
+          <!-- Leaflet Map Container -->
+          <div id="mapPicker"></div>
+
+          <div class="flex items-center justify-between text-[11px] text-slate-600 pt-1">
+            <span>Koordinat GPS: <strong id="coordDisplay" class="text-sky-700 font-mono">-6.2088, 106.8456</strong></span>
+            <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">✓ Siap Navigasi Google Maps Admin</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Catatan Tambahan Lokasi (Opsional)</label>
+          <input type="text" id="inline_address_notes" placeholder="Contoh: Pagar hitam, ada kran air di garasi depan..."
+                 class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-1 focus:ring-sky-500 bg-white">
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-[11px] text-slate-500">Alamat ini otomatis tersimpan untuk booking berikutnya.</span>
+          <button type="button" id="btnSaveInlineAddress"
+                  class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5">
+            <span>Simpan & Gunakan Alamat Ini</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden actual inputs that submit with the form -->
+      <textarea id="customer_address" name="customer_address" required class="hidden"></textarea>
+      <input type="hidden" id="customer_notes" name="customer_notes" value="">
+      <input type="hidden" id="latitude" name="latitude" value="">
+      <input type="hidden" id="longitude" name="longitude" value="">
+
+      <!-- Active Selected Address Indicator Badge -->
+      <div id="activeAddressDisplay" class="hidden p-3.5 bg-sky-50 border border-sky-200 rounded-xl items-start justify-between">
+        <div class="flex items-start gap-2.5">
+          <span class="text-xl mt-0.5">📍</span>
+          <div>
+            <span class="text-[11px] text-sky-800 uppercase font-bold block">Lokasi Cuci Terpilih:</span>
+            <span id="activeAddressText" class="text-xs font-bold text-slate-900 block">-</span>
+            <span id="activeAddressCoordText" class="text-[10px] font-mono text-slate-500 block mt-0.5">-</span>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold text-sky-700 bg-white px-2 py-0.5 rounded-full border border-sky-300 shrink-0">Alamat Siap</span>
+      </div>
+
+    </div>
+
+    <!-- Step 5: Ringkasan & Metode Pembayaran -->
+    <div class="glass-card p-5 space-y-4 bg-gradient-to-br from-white to-sky-50/50">
+      <div class="flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">5</span>
+        <h2 class="font-bold text-slate-900 text-base">Metode Pembayaran & Ringkasan</h2>
+      </div>
+
+      <!-- Payment Method: Cash (Tunai) -->
+      <div class="p-3.5 rounded-xl border-2 border-emerald-300 bg-emerald-50/70 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">
+            💵
+          </div>
+          <div>
+            <h4 class="font-black text-slate-900 text-sm">Pembayaran Tunai di Tempat (Cash on Delivery)</h4>
+            <p class="text-[11px] text-slate-600">Bayar langsung ke tim pencuci setelah pekerjaan selesai diperiksa.</p>
+          </div>
+        </div>
+        <span class="text-xs font-bold bg-emerald-600 text-white px-2.5 py-1 rounded-lg">Default</span>
+      </div>
+
+      <!-- Total Price Breakdown -->
+      <div class="border-t border-slate-200 pt-3 space-y-1.5 text-xs text-slate-600">
+        <div class="flex justify-between">
+          <span>Paket Terpilih:</span>
+          <span id="summaryPackageName" class="font-bold text-slate-800">Belum dipilih</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Jadwal Terpilih:</span>
+          <span id="summaryTime" class="font-bold text-slate-800">Belum dipilih</span>
+        </div>
+        <div class="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-dashed border-slate-300">
+          <span>Total Biaya:</span>
+          <span id="summaryPrice" class="text-xl text-sky-600 font-black">Rp 0</span>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" id="submitBookingBtn" disabled
+              class="w-full bg-sky-600 hover:bg-sky-700 text-white font-black py-4 rounded-xl shadow-lg shadow-sky-600/25 text-base transition transform active:scale-95 opacity-50 cursor-not-allowed">
+        Konfirmasi Pesanan Saya
+      </button>
+      <p class="text-center text-[11px] text-slate-400">
+        Setelah order dikirim, admin kami akan menghubungi Anda via WhatsApp untuk konfirmasi jadwal.
+      </p>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Leaflet JS for Free OpenStreetMap Coordinate Selection -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/static/js/booking.js"></script>
+{% endblock %}

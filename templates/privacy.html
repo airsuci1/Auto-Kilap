@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Kebijakan Privasi - AutoKilap{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6 pb-16 pt-2">
+  
+  <div class="space-y-1">
+    <a href="/" class="text-xs text-sky-600 hover:text-sky-700 flex items-center gap-1 font-semibold mb-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      <span>Kembali ke Beranda</span>
+    </a>
+    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Kebijakan Privasi</h1>
+    <p class="text-xs sm:text-sm text-slate-500">Komitmen AutoKilap dalam menjaga dan melindungi privasi data pribadi pengguna.</p>
+  </div>
+
+  <div class="glass-card p-6 sm:p-8 space-y-4 prose prose-slate max-w-none text-sm text-slate-700 leading-relaxed">
+    {% if policy_content %}
+      {{ policy_content|safe }}
+    {% else %}
+      <p>Kebijakan privasi sedang diperbarui oleh administrator.</p>
+    {% endif %}
+
+    <div class="pt-6 border-t border-slate-100 text-xs text-slate-500 space-y-1">
+      <p><strong>Alamat Kantor / Operasional:</strong> {{ admin_address or 'Jl. AutoKilap Raya, Indonesia' }}</p>
+      <p><strong>Kontak Layanan:</strong> WhatsApp {{ admin_phone }}</p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

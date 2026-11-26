@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - AutoKilap{% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-16">
+  
+  <!-- Admin Header & Sub-nav -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="space-y-1">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold uppercase tracking-wider">
+          Area Administrator
+        </span>
+      </div>
+      <h1 class="text-2xl font-black text-slate-900 tracking-tight">Manajemen Booking & Pesanan</h1>
+      <p class="text-xs text-slate-500">Kelola jadwal cuci panggilan, konfirmasi pesanan, dan hubungi pelanggan via WhatsApp.</p>
+    </div>
+
+    <!-- Quick Admin Action Links -->
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="/admin/users" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <span>Data Pelanggan</span>
+      </a>
+      <a href="/admin/finance" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>Laporan Keuangan</span>
+      </a>
+      <a href="/admin/packages" class="bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-sky-200 transition flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+        <span>Kelola Paket Cuci</span>
+      </a>
+      <a href="/admin/schedule" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 transition flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <span>Jadwal Slot</span>
+      </a>
+      <a href="/admin/settings" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 transition flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span>Konfigurasi</span>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Summary Statistics Cards -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="glass-card p-4 space-y-1">
+      <span class="text-xs text-slate-500 font-semibold block">Total Pesanan</span>
+      <span class="text-2xl font-black text-slate-900">{{ stats.total }}</span>
+    </div>
+
+    <div class="glass-card p-4 space-y-1 border-amber-200 bg-amber-50/40">
+      <span class="text-xs text-amber-800 font-bold block flex items-center gap-1">
+        <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+        Perlu Konfirmasi
+      </span>
+      <span class="text-2xl font-black text-amber-700">{{ stats.pending }}</span>
+    </div>
+
+    <div class="glass-card p-4 space-y-1 border-sky-200 bg-sky-50/40">
+      <span class="text-xs text-sky-800 font-semibold block">Dikonfirmasi (Kunci)</span>
+      <span class="text-2xl font-black text-sky-700">{{ stats.confirmed }}</span>
+    </div>
+
+    <div class="glass-card p-4 space-y-1 border-emerald-200 bg-emerald-50/40">
+      <span class="text-xs text-emerald-800 font-semibold block">Pesanan Selesai</span>
+      <span class="text-2xl font-black text-emerald-700">{{ stats.completed }}</span>
+    </div>
+  </div>
+
+  <!-- Filter & Search Controls -->
+  <div class="glass-card p-4 flex flex-wrap items-center justify-between gap-3">
+    <!-- Status Filter Pills -->
+    <div class="flex flex-wrap items-center gap-1.5 text-xs">
+      <a href="/admin/dashboard" class="px-3 py-1.5 rounded-xl font-bold transition {% if not current_status %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+        Semua ({{ stats.total }})
+      </a>
+      <a href="/admin/dashboard?status=pending" class="px-3 py-1.5 rounded-xl font-bold transition {% if current_status == 'pending' %}bg-amber-500 text-white{% else %}bg-amber-100 text-amber-800 hover:bg-amber-200{% endif %}">
+        Menunggu Konfirmasi ({{ stats.pending }})
+      </a>
+      <a href="/admin/dashboard?status=confirmed" class="px-3 py-1.5 rounded-xl font-bold transition {% if current_status == 'confirmed' %}bg-sky-600 text-white{% else %}bg-sky-100 text-sky-800 hover:bg-sky-200{% endif %}">
+        Dikonfirmasi ({{ stats.confirmed }})
+      </a>
+      <a href="/admin/dashboard?status=completed" class="px-3 py-1.5 rounded-xl font-bold transition {% if current_status == 'completed' %}bg-emerald-600 text-white{% else %}bg-emerald-100 text-emerald-800 hover:bg-emerald-200{% endif %}">
+        Selesai ({{ stats.completed }})
+      </a>
+    </div>
+
+    <!-- Date Filter -->
+    <form action="/admin/dashboard" method="GET" class="flex items-center gap-2">
+      <input type="date" name="date" value="{{ current_date or '' }}" class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500">
+      <button type="submit" class="bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-700 transition">
+        Filter
+      </button>
+      {% if current_date %}
+        <a href="/admin/dashboard" class="text-xs text-red-500 hover:underline">Reset</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Bookings List -->
+  <div class="space-y-4">
+    {% if not bookings %}
+      <div class="glass-card p-10 text-center space-y-2">
+        <span class="text-3xl">📭</span>
+        <h3 class="font-bold text-slate-800 text-base">Tidak Ada Pesanan Ditemukan</h3>
+        <p class="text-xs text-slate-500">Belum ada pesanan dengan filter status atau tanggal yang dipilih.</p>
+      </div>
+    {% else %}
+      {% for b in bookings %}
+        <div class="glass-card p-5 space-y-4 hover:border-slate-300 transition">
+          
+          <!-- Top Row: Code, Date & Status -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2.5">
+              <span class="font-mono font-bold text-sm text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg">#{{ b.booking_code }}</span>
+              <span class="text-xs text-slate-500">Dibuat: {{ (b.created_at|string)[:16] }}</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <!-- Status Badge -->
+              <span class="status-badge 
+                {% if b.status == 'confirmed' %}status-confirmed
+                {% elif b.status == 'completed' %}status-completed
+                {% elif b.status == 'cancelled' %}status-cancelled
+                {% elif b.status == 'in_progress' %}status-in_progress
+                {% else %}status-pending{% endif %}">
+                {% if b.status == 'pending' %}⏳ Menunggu Konfirmasi
+                {% elif b.status == 'confirmed' %}✓ Dikonfirmasi (Terkunci)
+                {% elif b.status == 'in_progress' %}🔄 Sedang Dicuci
+                {% elif b.status == 'completed' %}🏆 Selesai
+                {% elif b.status == 'cancelled' %}✕ Dibatalkan
+                {% endif %}
+              </span>
+            </div>
+          </div>
+
+          <!-- Middle Row: Customer Info, Vehicle & Schedule -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <!-- Customer -->
+            <div class="space-y-1">
+              <span class="text-[10px] uppercase font-bold text-slate-400">Pelanggan:</span>
+              <div class="font-bold text-slate-900 text-sm">{{ b.customer_name }}</div>
+              <div class="text-slate-600 flex items-center gap-1">
+                <span>📱 {{ b.customer_phone }}</span>
+              </div>
+              <div class="text-slate-500 line-clamp-2 mt-1">📍 {{ b.customer_address }}</div>
+            </div>
+
+            <!-- Vehicle & Package -->
+            <div class="space-y-1">
+              <span class="text-[10px] uppercase font-bold text-slate-400">Kendaraan & Layanan:</span>
+              <div class="font-bold text-slate-900 text-sm">
+                {% if b.vehicle_type == 'mobil' %}🚗{% else %}🛵{% endif %} {{ b.vehicle_model }}
+                <span class="font-normal text-slate-500">({{ b.license_plate }})</span>
+              </div>
+              <div class="text-sky-700 font-semibold">{{ b.package_name }}</div>
+              <div class="font-black text-slate-900 text-sm mt-1">
+                Rp {{ "{:,}".format(b.total_price).replace(',', '.') }} 
+                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded ml-1">Tunai (COD)</span>
+              </div>
+            </div>
+
+            <!-- Scheduled Slot -->
+            <div class="space-y-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <span class="text-[10px] uppercase font-bold text-slate-500">Jadwal Kedatangan Tim:</span>
+              <div class="text-sm font-black text-sky-800">
+                📅 {{ b.booking_date }}
+              </div>
+              <div class="text-xs font-bold text-slate-700">
+                ⏰ Pukul {{ b.booking_time }} WIB
+              </div>
+              {% if b.status == 'confirmed' %}
+                <span class="inline-block text-[10px] font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full mt-1">
+                  🔒 Slot Terkunci untuk user lain
+                </span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Bottom Row: Primary Actions (WhatsApp Contact, Google Maps & Status Updater) -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+            
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- GREEN WHATSAPP BUTTON (User Requirement!) -->
+              <a href="https://wa.me/{{ b.wa_phone }}?text={{ b.wa_message }}" target="_blank"
+                 class="btn-whatsapp text-xs py-2 px-3.5 shadow-sm">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.044c.101-.116.433-.506.549-.68.116-.173.232-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/>
+                </svg>
+                <span>WA Pelanggan</span>
+              </a>
+
+              <!-- GOOGLE MAPS NAVIGATION BUTTON (User Requirement!) -->
+              <a href="{{ b.maps_url }}" target="_blank"
+                 class="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-300 font-bold text-xs py-2 px-3 rounded-xl transition flex items-center gap-1.5 shadow-sm"
+                 title="Buka rute navigasi menuju lokasi pelanggan di Google Maps">
+                <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span>Navigasi Maps</span>
+              </a>
+            </div>
+
+            <!-- Status Control Form -->
+            <form action="/admin/booking/{{ b.id }}/status" method="POST" class="flex items-center gap-1.5">
+              {% if b.status == 'pending' %}
+                <button type="submit" name="status" value="confirmed"
+                        class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1">
+                  <span>✓ Konfirmasi Jadwal (Kunci Slot)</span>
+                </button>
+              {% elif b.status == 'confirmed' %}
+                <button type="submit" name="status" value="completed"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1">
+                  <span>✓ Tandai Selesai</span>
+                </button>
+              {% endif %}
+
+              <div class="relative inline-block">
+                <select name="status" onchange="this.form.submit()"
+                        class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-xl border border-slate-200 cursor-pointer focus:outline-none">
+                  <option value="" disabled selected>Ubah Status...</option>
+                  <option value="pending" {% if b.status == 'pending' %}disabled{% endif %}>⏳ Menunggu Konfirmasi</option>
+                  <option value="confirmed" {% if b.status == 'confirmed' %}disabled{% endif %}>✓ Konfirmasi (Kunci Slot)</option>
+                  <option value="in_progress">🔄 Sedang Dicuci</option>
+                  <option value="completed" {% if b.status == 'completed' %}disabled{% endif %}>🏆 Selesai</option>
+                  <option value="cancelled" {% if b.status == 'cancelled' %}disabled{% endif %}>✕ Batalkan</option>
+                </select>
+              </div>
+            </form>
+
+          </div>
+
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

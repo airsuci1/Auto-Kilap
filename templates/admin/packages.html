@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Kelola Paket Cuci - Admin AutoKilap{% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-16">
+  
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="space-y-1">
+      <a href="/admin/dashboard" class="text-xs text-sky-600 hover:text-sky-700 flex items-center gap-1 font-semibold mb-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <span>Kembali ke Dashboard Admin</span>
+      </a>
+      <h1 class="text-2xl font-black text-slate-900 tracking-tight">Kelola Paket & Harga Cuci</h1>
+      <p class="text-xs text-slate-500">Tambah paket baru atau ubah harga dan deskripsi paket cuci mobil & motor.</p>
+    </div>
+
+    <!-- Add Package Button -->
+    <button onclick="document.getElementById('addPackageModal').classList.remove('hidden')"
+            class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-sky-600/20 transition flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      <span>+ Tambah Paket Baru</span>
+    </button>
+  </div>
+
+  <!-- Packages List by Category -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    
+    <!-- Mobil Packages -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 border-b border-slate-200 pb-2">
+        <span class="text-xl">🚗</span>
+        <h2 class="font-bold text-slate-900 text-base">Paket Cuci Mobil</h2>
+      </div>
+
+      <div class="space-y-3">
+        {% for pkg in car_packages %}
+          <div class="glass-card p-4 space-y-3">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <h3 class="font-black text-slate-900 text-sm">{{ pkg.name }}</h3>
+                <span class="text-[11px] text-slate-500 font-semibold">⏱️ {{ pkg.duration_minutes }} Menit</span>
+              </div>
+              <div class="text-right">
+                <span class="text-base font-black text-sky-600">Rp {{ "{:,}".format(pkg.price).replace(',', '.') }}</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-600">{{ pkg.description }}</p>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button onclick='openEditModal({{ pkg|tojson }})'
+                      class="text-xs font-bold text-slate-600 hover:text-sky-600 bg-slate-100 px-3 py-1.5 rounded-lg transition">
+                ✏️ Ubah Harga / Info
+              </button>
+              <form action="/admin/package/{{ pkg.id }}/delete" method="POST" onsubmit="return confirm('Hapus paket ini?')">
+                <button type="submit" class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 px-3 py-1.5 rounded-lg transition">
+                  🗑️ Hapus
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Motor Packages -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 border-b border-slate-200 pb-2">
+        <span class="text-xl">🛵</span>
+        <h2 class="font-bold text-slate-900 text-base">Paket Cuci Motor</h2>
+      </div>
+
+      <div class="space-y-3">
+        {% for pkg in motor_packages %}
+          <div class="glass-card p-4 space-y-3">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <h3 class="font-black text-slate-900 text-sm">{{ pkg.name }}</h3>
+                <span class="text-[11px] text-slate-500 font-semibold">⏱️ {{ pkg.duration_minutes }} Menit</span>
+              </div>
+              <div class="text-right">
+                <span class="text-base font-black text-sky-600">Rp {{ "{:,}".format(pkg.price).replace(',', '.') }}</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-600">{{ pkg.description }}</p>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button onclick='openEditModal({{ pkg|tojson }})'
+                      class="text-xs font-bold text-slate-600 hover:text-sky-600 bg-slate-100 px-3 py-1.5 rounded-lg transition">
+                ✏️ Ubah Harga / Info
+              </button>
+              <form action="/admin/package/{{ pkg.id }}/delete" method="POST" onsubmit="return confirm('Hapus paket ini?')">
+                <button type="submit" class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 px-3 py-1.5 rounded-lg transition">
+                  🗑️ Hapus
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modal Tambah Paket -->
+<div id="addPackageModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <h3 class="font-black text-slate-900 text-base">Tambah Paket Cuci Baru</h3>
+      <button onclick="document.getElementById('addPackageModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold">&times;</button>
+    </div>
+
+    <form action="/admin/package/create" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kategori Kendaraan</label>
+        <select name="category" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm">
+          <option value="mobil">🚗 Mobil</option>
+          <option value="motor">🛵 Motor</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Paket</label>
+        <input type="text" name="name" required placeholder="Contoh: Cuci Salju Ekstra Poles Wax" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm">
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Harga (Rp)</label>
+          <input type="number" name="price" required min="1000" step="5000" placeholder="75000" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Estimasi Durasi (Menit)</label>
+          <input type="number" name="duration_minutes" required min="15" step="15" value="60" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Deskripsi Layanan</label>
+        <textarea name="description" rows="3" placeholder="Rincian layanan yang didapat pelanggan..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="document.getElementById('addPackageModal').classList.add('hidden')"
+                class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700">Batal</button>
+        <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition">
+          Simpan Paket
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Edit Paket -->
+<div id="editPackageModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <h3 class="font-black text-slate-900 text-base">Ubah Harga & Detail Paket</h3>
+      <button onclick="document.getElementById('editPackageModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold">&times;</button>
+    </div>
+
+    <form id="editPackageForm" action="" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kategori Kendaraan</label>
+        <select id="edit_category" name="category" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm">
+          <option value="mobil">🚗 Mobil</option>
+          <option value="motor">🛵 Motor</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Paket</label>
+        <input type="text" id="edit_name" name="name" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm">
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Harga (Rp)</label>
+          <input type="number" id="edit_price" name="price" required min="1000" step="5000" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-sky-700">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Estimasi Durasi (Menit)</label>
+          <input type="number" id="edit_duration" name="duration_minutes" required min="15" step="15" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Deskripsi Layanan</label>
+        <textarea id="edit_description" name="description" rows="3" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="document.getElementById('editPackageModal').classList.add('hidden')"
+                class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700">Batal</button>
+        <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition">
+          Perbarui Paket
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openEditModal(pkg) {
+  document.getElementById('editPackageForm').action = '/admin/package/' + pkg.id + '/update';
+  document.getElementById('edit_category').value = pkg.category;
+  document.getElementById('edit_name').value = pkg.name;
+  document.getElementById('edit_price').value = pkg.price;
+  document.getElementById('edit_duration').value = pkg.duration_minutes;
+  document.getElementById('edit_description').value = pkg.description || '';
+  document.getElementById('editPackageModal').classList.remove('hidden');
+}
+</script>
+{% endblock %}

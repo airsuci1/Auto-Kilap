@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Masuk Akun - AutoKilap{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto space-y-6 pt-4 pb-8">
+  
+  <div class="text-center space-y-1">
+    <div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mx-auto mb-3">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+      </svg>
+    </div>
+    <h1 class="text-2xl font-black text-slate-900 tracking-tight">Masuk Akun</h1>
+    <p class="text-xs text-slate-500">Silakan masuk untuk mengelola dan memesan jadwal cuci panggilan</p>
+  </div>
+
+  <div class="glass-card p-6 space-y-5">
+    
+    {% if demo_mode %}
+    <!-- Quick Demo Accounts for Testing (Hanya Muncul Jika Demo Mode ON) -->
+    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+      <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">Akun Uji Coba Cepat (Demo Mode):</span>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" onclick="fillAccount('admin@autokilap.com', 'admin123')"
+                class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-lg text-left text-xs text-amber-900 transition">
+          <span class="font-bold block">👑 Akun Admin</span>
+          <span class="text-[10px] text-amber-700">admin@autokilap.com</span>
+        </button>
+        <button type="button" onclick="fillAccount('customer@example.com', 'user123')"
+                class="px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 border border-sky-300 rounded-lg text-left text-xs text-sky-900 transition">
+          <span class="font-bold block">👤 Customer Demo</span>
+          <span class="text-[10px] text-sky-700">customer@example.com</span>
+        </button>
+      </div>
+    </div>
+    {% endif %}
+
+    <form action="/auth/login{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" method="POST" class="space-y-4">
+      <input type="hidden" name="next" value="{{ next_url or '' }}">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="email">
+          Alamat Email
+        </label>
+        <input type="email" id="email" name="email" required placeholder="nama@email.com"
+               class="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition">
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider" for="password">
+            Password
+          </label>
+          <a href="/auth/forgot-password" class="text-xs text-sky-600 hover:text-sky-700 font-semibold">
+            Lupa Password?
+          </a>
+        </div>
+        <input type="password" id="password" name="password" required placeholder="••••••••"
+               class="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition">
+      </div>
+
+
+      <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl shadow-md shadow-sky-600/20 text-sm transition transform active:scale-95">
+        Masuk
+      </button>
+    </form>
+
+    <div class="border-t border-slate-100 pt-4 text-center space-y-2">
+      <p class="text-xs text-slate-600">
+        Belum memiliki akun?
+        <a href="/auth/register{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" class="font-bold text-sky-600 hover:text-sky-700 ml-1">Daftar Sekarang</a>
+      </p>
+      <p class="text-xs text-slate-400">
+        Belum memverifikasi kode email?
+        <a href="/auth/verify" class="text-slate-600 underline ml-1">Verifikasi di sini</a>
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function fillAccount(email, password) {
+  document.getElementById('email').value = email;
+  document.getElementById('password').value = password;
+}
+</script>
+{% endblock %}
